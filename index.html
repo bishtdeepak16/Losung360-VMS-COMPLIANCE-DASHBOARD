@@ -997,12 +997,13 @@ function getMs(name) {
 // ================= LINKED SLICERS (FC / Client / Channel / Platform) =================
 const CAS = { rows: null, dims: ['client', 'loc', 'channel', 'platform'], sel: { client: new Set(), loc: new Set(), channel: new Set(), platform: new Set() } };
 const PLAT_LABEL = { FLIPKART: 'Flipkart', SMOOTHOPS: 'SmoothOps', UNKNOWN: 'Unknown' };
-function platOf(ch) { return !ch ? 'UNKNOWN' : ch === 'FLIPKART' ? 'FLIPKART' : 'SMOOTHOPS'; }
+const FLIPKART_CLIENTS = ['VELOCITY', 'NIPPON'];
+function platOf(ch, client) { return !ch ? 'UNKNOWN' : (ch === 'FLIPKART' && FLIPKART_CLIENTS.includes(String(client || '').trim().toUpperCase())) ? 'FLIPKART' : 'SMOOTHOPS'; }
 function casInit(opts) {
   const rows = [], seen = new Set();
   [opts.outbound, opts.returns].forEach(o => ((o && o.rows) || []).forEach(r => {
     const k = r.join('\u0001'); if (seen.has(k)) return; seen.add(k);
-    rows.push({ client: r[0] || '', loc: r[1] || '', channel: r[2] || '', platform: platOf(r[2]) });
+    rows.push({ client: r[0] || '', loc: r[1] || '', channel: r[2] || '', platform: platOf(r[2], r[0]) });
   }));
   CAS.rows = rows.length ? rows : null;
 }
