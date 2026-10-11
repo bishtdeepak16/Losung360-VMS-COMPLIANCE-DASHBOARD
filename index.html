@@ -471,6 +471,12 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
 #rpFrame{width:100%;height:900px;border:1px solid var(--border);border-radius:14px;background:#EEF3FB}
 .sec-actions .auth-btn.sm{height:36px;font-size:12px;padding:0 16px}
 .auth-btn.sm{white-space:nowrap}.sec-actions{flex-wrap:wrap;justify-content:flex-end}
+
+.dg-row{display:flex;gap:12px;align-items:flex-start;padding:11px 4px;border-bottom:1px solid #EEF3FA}
+.dg-dot{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:800 12px Inter,sans-serif}
+.dg-dot.ok{background:#D8F5E6;color:#0B7A47}.dg-dot.bad{background:#FDE2E1;color:#B42318}
+.dg-name{font:700 13px Inter,sans-serif;color:#0F1E3C}.dg-det{font:500 12px Inter,sans-serif;color:#64748B;margin-top:2px;word-break:break-word}
+.hdr-right{gap:10px}
 </style>
 <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
@@ -496,6 +502,13 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
 </div>
 
 <!-- USER PANEL (admin) -->
+<div class="up-ov" id="dgOv" onclick="if(event.target===this)$('dgOv').classList.remove('open')">
+  <div class="up-box" style="max-width:640px">
+    <div class="up-head"><div><div class="up-title">Diagnose</div><div class="up-sub" id="dgSub">Checks that everything behind the dashboard and reports is working.</div></div>
+      <div class="up-head-r"><button class="auth-btn sm" onclick="openDiag()">Re-run</button><button class="up-x" onclick="$('dgOv').classList.remove('open')" aria-label="Close">✕</button></div></div>
+    <div class="up-body"><div id="dgList"></div></div>
+  </div>
+</div>
 <div class="up-ov" id="upOv" onclick="if(event.target===this)closeUserPanel()">
   <div class="up-box">
     <div class="up-head">
@@ -547,10 +560,7 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
     <button class="nav-item" id="nav-clients" onclick="switchTab('clients')">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> By Client
     </button>
-    <div class="sb-section" id="sbAdminSec" style="display:none">Admin</div>
-    <button class="nav-item" id="nav-report" style="display:none" onclick="switchTab('report')">
-      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.4L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></svg> AI Report
-    </button>
+    <button class="nav-item" id="nav-report" style="display:none" tabindex="-1" aria-hidden="true"></button>
   </nav>
   <div class="sb-user" id="sbUser" onclick="toggleUserMenu(event)">
     <div class="user-menu" id="userMenu" onclick="event.stopPropagation()">
@@ -571,6 +581,8 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
     <div class="hdr-spacer"></div>
     <div class="hdr-right">
       <button class="btn-ghost up-btn" id="userPanelBtn" onclick="openUserPanel()"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> User Panel</button>
+      <button class="btn-ghost up-btn" id="autoRepBtn" onclick="switchTab('report')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.4L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></svg> Automated Report</button>
+      <button class="btn-ghost up-btn" id="diagBtn" onclick="openDiag()"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Diagnose</button>
       <button class="btn-refresh" id="refreshBtn" onclick="refreshAll()">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg> Refresh
       </button>
@@ -605,7 +617,7 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
       <div class="ms-dropdown" id="locDd">
         <div class="ms-search"><input type="text" placeholder="Search FCs…" oninput="msSearch('loc',this.value)"></div>
         <div class="ms-opts" id="locOpts">
-          <label class="ms-opt ms-all"><input type="checkbox" id="locAllCb" checked onchange="msToggleAll('loc')"> All FCs</label>
+          <label class="ms-opt ms-all"><input type="checkbox" id="locAllCb" checked onchange="msToggleAll('loc')"> <span id="locAllTxt">All FCs</span></label>
         </div>
       </div>
     </div>
@@ -963,8 +975,9 @@ function msUpdateBtn(name) {
   const txt   = document.getElementById(name + 'BtnTxt');
   const badge = document.getElementById(name + 'Badge');
   const labels = {client:'Clients',loc:'FCs',channel:'Channels',platform:'Platforms'};
+  const mine = (name === 'loc' && S.user && S.user.role !== 'admin' && !S.user.all && S.user.fcs && S.user.fcs.length) ? S.user.fcs : null;
   if (sel.length === all.length || sel.length === 0) {
-    txt.textContent = 'All ' + labels[name];
+    txt.textContent = mine ? (mine.length <= 2 ? mine.join(', ') : mine.length + ' FCs') : 'All ' + labels[name];
     btn.classList.remove('active');
   } else if (sel.length === 1) {
     txt.textContent = sel[0].value;
@@ -1377,6 +1390,12 @@ function drawMonthly(canvasId, m, totalLabel) {
 }
 
 // COMBO CHART
+function wrapLbl(t) {
+  const words = t.replace(/_/g, ' ').split(/\s+/).filter(Boolean), lines = []; let cur = '';
+  words.forEach(w => { if (cur && (cur + ' ' + w).length > 13) { lines.push(cur); cur = w; } else cur = cur ? cur + ' ' + w : w; });
+  if (cur) lines.push(cur);
+  return lines.length > 1 ? lines : (lines[0] || t);
+}
 function drawCombo(canvasId, data, xCol, barCol, lineCol, barHex, barLbl, lineLbl) {
   const el = document.getElementById(canvasId);
   if (!el) return;
@@ -1441,7 +1460,7 @@ function drawCombo(canvasId, data, xCol, barCol, lineCol, barHex, barLbl, lineLb
       scales:{
         x:{
           grid:{display:false},
-          ticks:{font:{family:'Inter',size:10},color:'#94A3B8',maxRotation:45,maxTicksLimit:22}
+          ticks:{font:{family:'Inter',size:11,weight:'600'},color:'#64748B',maxRotation:0,minRotation:0,autoSkip:labels.length>14,maxTicksLimit:22,padding:8,callback(v){return wrapLbl(String(this.getLabelForValue(v)));}}
         },
         y:{
           position:'left',
@@ -1666,7 +1685,9 @@ function renderUser() {
   $('umRole').className = 'um-role' + (u.role === 'admin' ? ' admin' : '');
   $('umFc').textContent = u.all ? 'Access: all FCs' : 'Access: ' + u.fcs.join(', ');
   $('userPanelBtn').classList.toggle('show', u.role === 'admin');
-  $('nav-report').style.display = $('sbAdminSec').style.display = u.role === 'admin' ? '' : 'none';
+  ['autoRepBtn', 'diagBtn'].forEach(id => $(id).classList.toggle('show', u.role === 'admin'));
+  if (u.role !== 'admin' && !u.all && $('locAllTxt')) $('locAllTxt').textContent = 'All my FCs';
+  try { msUpdateBtn('loc'); } catch (e) {}
 }
 function toggleUserMenu(e) { e.stopPropagation(); $('userMenu').classList.toggle('open'); }
 document.addEventListener('click', e => { if (!e.target.closest('#sbUser')) $('userMenu').classList.remove('open'); });
@@ -1791,6 +1812,17 @@ function fitTbl(tbodyId) {
   const tb = $(tbodyId), w = tb && tb.closest('.tbl-wrap'); if (!w) return;
   const rows = tb.rows.length;
   w.style.maxHeight = rows <= 16 ? 'none' : '560px';
+}
+
+// ================= DIAGNOSE (admins) =================
+async function openDiag() {
+  $('dgOv').classList.add('open');
+  $('dgList').innerHTML = '<div class="auth-hint" style="padding:30px 0">Running checks…</div>';
+  try {
+    const r = await rawApi('diagnose', { t: S.token });
+    $('dgSub').textContent = 'Last run ' + r.at;
+    $('dgList').innerHTML = r.checks.map(c => `<div class="dg-row"><span class="dg-dot ${c.ok ? 'ok' : 'bad'}">${c.ok ? '✓' : '!'}</span><div><div class="dg-name">${esc(c.name)}</div><div class="dg-det">${esc(c.detail)}</div></div></div>`).join('');
+  } catch (e) { if (e.message === 'AUTH_REQUIRED') return sessionExpired(); $('dgList').innerHTML = `<div class="auth-err" style="padding:20px 0">${esc(e.message)}</div>`; }
 }
 
 // ================= USER PANEL (admins) =================
