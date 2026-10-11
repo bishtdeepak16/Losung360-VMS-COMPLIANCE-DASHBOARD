@@ -451,6 +451,26 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
 .auth-gbtn:disabled{opacity:.65;cursor:wait;transform:none}
 .auth-note{margin-top:10px;font-size:11.5px;line-height:1.5;color:var(--text-2)}
 .auth-note:empty{display:none}
+
+/* ===== v9: AI report ===== */
+.tab-report .filter-bar{display:none}
+.rp-ctl{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px;padding:6px 22px 20px}
+.rp-field{display:flex;flex-direction:column;gap:5px}
+.rp-field label{font-size:10px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--text-3)}
+.rp-field select{height:42px;min-width:240px;border:1.5px solid #DCE7F7;background:#F6F9FF;border-radius:12px;padding:0 12px;font:600 13px Inter,sans-serif;color:var(--text-1);outline:none}
+.rp-field select:focus{border-color:var(--orange);background:#fff}
+.rp-ctl .up-check{margin:0 0 12px}
+.rp-ctl .auth-btn.sm{margin-bottom:1px}
+.rp-note{font-size:12px;color:var(--text-2);margin-bottom:12px}
+.rp-recips{padding:0 22px 12px;font-size:12px;color:var(--text-2);line-height:1.8}
+.rp-recips b{color:var(--text-1)}
+.rp-chip{display:inline-block;margin:2px 4px 2px 0;padding:2px 10px;border-radius:99px;background:#F1F5FB;color:var(--text-1);font-size:11px;font-weight:600}
+.rp-chip.a{background:var(--orange-lt);color:var(--orange-dk)}
+.rp-ok{color:#0B7A47;font-weight:700}.rp-bad{color:var(--red);font-weight:700}
+.rp-frame-wrap{padding:0 22px 22px}
+#rpFrame{width:100%;height:900px;border:1px solid var(--border);border-radius:14px;background:#EEF3FB}
+.sec-actions .auth-btn.sm{height:36px;font-size:12px;padding:0 16px}
+.auth-btn.sm{white-space:nowrap}.sec-actions{flex-wrap:wrap;justify-content:flex-end}
 </style>
 <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
@@ -526,6 +546,10 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
     </button>
     <button class="nav-item" id="nav-clients" onclick="switchTab('clients')">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> By Client
+    </button>
+    <div class="sb-section" id="sbAdminSec" style="display:none">Admin</div>
+    <button class="nav-item" id="nav-report" style="display:none" onclick="switchTab('report')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.4L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></svg> AI Report
     </button>
   </nav>
   <div class="sb-user" id="sbUser" onclick="toggleUserMenu(event)">
@@ -779,6 +803,46 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
       </div>
     </div>
 
+    <!-- ══ AI REPORT (admins) ══ -->
+    <div class="tab-panel" id="tab-report">
+      <div class="sec-card">
+        <div class="sec-head tbl-head">
+          <div class="sec-titles"><div class="sec-title">AI Report</div><div class="sec-sub">A brief, colourful performance review written by Groq AI from your BigQuery numbers — MTD, YTD and week-wise. Preview it here, then email it.</div></div>
+        </div>
+        <div class="rp-ctl">
+          <div class="rp-field"><label>Report for</label><select id="rpScope" onchange="rpScopeChanged()"><option value="ALL">All FCs — admin overview</option></select></div>
+          <label class="up-check"><input type="checkbox" id="rpExcel" checked> Attach raw MTD Excel (Outbound &amp; Returns)</label>
+          <label class="up-check" id="rpCopyWrap" style="display:none"><input type="checkbox" id="rpCopy" onchange="rpGenerate()"> Also copy admins</label>
+          <button class="auth-btn sm" id="rpGen" onclick="rpGenerate()">✦ Generate report</button>
+        </div>
+      </div>
+      <div class="sec-card" id="rpOut" style="display:none">
+        <div class="sec-head tbl-head">
+          <div class="sec-titles"><div class="sec-title" id="rpTitle">Report</div><div class="sec-sub" id="rpSub"></div></div>
+          <div class="sec-actions">
+            <span class="chip" id="rpAi"></span>
+            <button class="btn-export" onclick="rpPdf()">Download PDF</button>
+            <button class="btn-export" onclick="rpRaw('ob',this)">Outbound Excel</button>
+            <button class="btn-export" onclick="rpRaw('ret',this)">Returns Excel</button>
+            <button class="auth-btn sm" id="rpSend" onclick="rpSend()">✉ Send email</button>
+          </div>
+        </div>
+        <div class="rp-recips" id="rpRecips"></div>
+        <div class="rp-frame-wrap"><iframe id="rpFrame" title="Report preview"></iframe></div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-head tbl-head">
+          <div class="sec-titles"><div class="sec-title">Automatic weekly email</div><div class="sec-sub">Every Monday the full report goes to all admins and each FC's users (with their raw MTD Excel) — sent from the primary admin's account.</div></div>
+        </div>
+        <div class="rp-ctl">
+          <label class="up-check"><input type="checkbox" id="rpSchedOn"> Send automatically every Monday</label>
+          <div class="rp-field"><label>Time (IST)</label><select id="rpSchedHour"></select></div>
+          <button class="auth-btn sm" id="rpSchedSave" onclick="rpSchedSave()">Save schedule</button>
+          <span class="rp-note" id="rpSchedNote"></span>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ BY CLIENT CHARTS ══ -->
     <div class="tab-panel" id="tab-clients">
       <div class="sec-card">
@@ -1026,7 +1090,8 @@ const TAB_JOBS = {
   returns:    () => Promise.allSettled([loadRetSummary(), loadRetByClient(), loadRetTrend()]),
   trends:     () => Promise.allSettled([loadObMonthly(),  loadRetMonthly()]),
   bylocation: () => Promise.allSettled([loadObByLoc(),    loadRetByLoc()]),
-  clients:    () => Promise.allSettled([loadObClientChart(), loadRetClientChart()])
+  clients:    () => Promise.allSettled([loadObClientChart(), loadRetClientChart()]),
+  report:     () => Promise.resolve()
 };
 function activeTab() { return document.querySelector('.tab-panel.active')?.id?.replace('tab-','') || 'outbound'; }
 // Load a section once per filter-set; later calls reuse the in-flight / finished load
@@ -1054,6 +1119,7 @@ function switchTab(name) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
+  document.body.classList.toggle('tab-report', name === 'report');
   ensureTab(name);
   setTimeout(() => Object.values(S.charts).forEach(c => c.resize()), 30);
 }
@@ -1397,6 +1463,7 @@ async function rawJson(url) {
   catch (e) { throw new Error('Cannot reach Apps Script Web App'); }
   if (!json.ok) {
     const m = String(json.error || 'Export failed');
+    if (m === 'AUTH_REQUIRED') { sessionExpired(); throw new Error('Session expired — please sign in again.'); }
     if (/Unknown action/i.test(m)) throw new Error('Apps Script is old - paste the new Code.gs and deploy a new version (export actions missing).');
     throw new Error(m);
   }
@@ -1585,6 +1652,7 @@ async function startApp(user, token) {
   renderUser();
   $('authOv').classList.add('off');
   await loadFilterOptions();
+  if (S.user.role === 'admin') { fillReportScope(); rpSchedLoad(); }
   await loadAll();
 }
 function renderUser() {
@@ -1596,6 +1664,7 @@ function renderUser() {
   $('umRole').className = 'um-role' + (u.role === 'admin' ? ' admin' : '');
   $('umFc').textContent = u.all ? 'Access: all FCs' : 'Access: ' + u.fcs.join(', ');
   $('userPanelBtn').classList.toggle('show', u.role === 'admin');
+  $('nav-report').style.display = $('sbAdminSec').style.display = u.role === 'admin' ? '' : 'none';
 }
 function toggleUserMenu(e) { e.stopPropagation(); $('userMenu').classList.toggle('open'); }
 document.addEventListener('click', e => { if (!e.target.closest('#sbUser')) $('userMenu').classList.remove('open'); });
@@ -1614,6 +1683,102 @@ async function boot() {
     }
   }
   authStep('authLoginStep');
+}
+
+
+// ================= AI REPORT (admins) =================
+const RP = { last: null };
+function fillReportScope() {
+  const sel = $('rpScope'); if (!sel) return;
+  const fcs = [...new Set([...(S.allFcs || []), ...((CAS.rows || []).map(r => r.loc))].filter(Boolean))].sort();
+  sel.innerHTML = '<option value="ALL">All FCs — admin overview</option>' + fcs.map(f => `<option value="${esc(f)}">${esc(f)} only</option>`).join('');
+}
+function rpScopeChanged() {
+  $('rpCopyWrap').style.display = $('rpScope').value === 'ALL' ? 'none' : 'flex';
+  $('rpOut').style.display = 'none'; RP.last = null;
+}
+async function rpGenerate() {
+  const btn = $('rpGen'), scope = $('rpScope').value;
+  btn.disabled = true; btn.textContent = 'Analysing with AI…';
+  try {
+    const r = await rawApi('report_preview', { t: S.token, scope, copyAdmins: scope !== 'ALL' && $('rpCopy').checked ? 'Y' : 'N' });
+    RP.last = { scope, r };
+    $('rpTitle').textContent = (scope === 'ALL' ? 'All FCs' : scope) + ' — report preview';
+    $('rpSub').textContent = 'MTD ' + r.mtd + ' · subject: ' + r.subject;
+    $('rpAi').textContent = r.ai ? '✦ AI by Groq' : 'AI unavailable';
+    $('rpAi').className = 'chip' + (r.ai ? ' g' : '');
+    if (!r.ai) toast(r.aiError || 'AI summary unavailable — rule-based summary used', 'err');
+    const admins = r.recipients.filter(x => x.kind === 'admin'), fcu = r.recipients.filter(x => x.kind === 'fc');
+    $('rpRecips').innerHTML = r.recipients.length
+      ? `<b>Will be emailed to ${r.recipients.length}:</b> ${admins.length} admin${admins.length === 1 ? '' : 's'} · ${fcu.length} FC user${fcu.length === 1 ? '' : 's'}<br>` +
+        r.recipients.map(x => `<span class="rp-chip ${x.kind === 'admin' ? 'a' : ''}" title="${esc(x.email)}">${esc(x.name)} · ${esc(x.fcs)}</span>`).join('')
+      : '<span class="rp-bad">No recipients for this scope yet — add FC users in the User Panel.</span>';
+    $('rpOut').style.display = 'block';
+    const f = $('rpFrame');
+    f.onload = () => { try { f.style.height = (f.contentDocument.documentElement.scrollHeight + 8) + 'px'; } catch (e) {} };
+    f.srcdoc = r.html;
+  } catch (e) { if (e.message === 'AUTH_REQUIRED') return sessionExpired(); toast(e.message, 'err'); }
+  finally { btn.disabled = false; btn.textContent = '✦ Generate report'; }
+}
+function rpPdf() {
+  const f = $('rpFrame'); if (!RP.last) return;
+  try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('Could not open print dialog: ' + e.message, 'err'); }
+}
+async function rpSend() {
+  if (!RP.last) return;
+  const { scope, r } = RP.last, n = r.recipients.length;
+  if (!n) { toast('No recipients for this scope — add FC users in the User Panel', 'err'); return; }
+  const excel = $('rpExcel').checked;
+  if (!confirm(`Send this report to ${n} recipient${n === 1 ? '' : 's'}${excel ? ', with raw MTD Excel attached' : ''}?\n\n` + r.recipients.map(x => `• ${x.name} <${x.email}> — ${x.fcs}`).join('\n'))) return;
+  const btn = $('rpSend'), label = btn.textContent;
+  btn.disabled = true; btn.textContent = excel ? 'Sending… (can take a few minutes)' : 'Sending…';
+  try {
+    const res = await rawApi('report_send', { t: S.token, scope, excel: excel ? 'Y' : 'N', copyAdmins: scope !== 'ALL' && $('rpCopy').checked ? 'Y' : 'N' });
+    $('rpRecips').innerHTML = `<span class="rp-ok">✓ ${res.sent} email${res.sent === 1 ? '' : 's'} sent</span>` + (res.ai ? '' : ' · AI summary was unavailable for some') +
+      (res.excelSkipped && res.excelSkipped.length ? ' · <span class="rp-bad">Excel skipped for some (size/time) — they were told to export from the dashboard</span>' : '') +
+      (res.failed && res.failed.length ? `<br><span class="rp-bad">Failed: ${esc(res.failed.join('; '))}</span>` : '');
+    toast(`Report sent to ${res.sent} recipient${res.sent === 1 ? '' : 's'}`, 'ok');
+  } catch (e) { if (e.message === 'AUTH_REQUIRED') return sessionExpired(); toast(e.message, 'err'); }
+  finally { btn.disabled = false; btn.textContent = label; }
+}
+async function rpRaw(kind, btn) {
+  if (!RP.last || btn.disabled) return;
+  const { scope, r } = RP.last, label = btn.innerHTML; btn.disabled = true; btn.textContent = 'Preparing…';
+  try {
+    const q = { action: kind + '_export', from: r.from, to: r.to, t: S.token }; if (scope !== 'ALL') q.locs = scope;
+    const d = await rawJson(`${API}?${new URLSearchParams(q)}`);
+    const rows = d.rows.slice(), total = d.total || rows.length; let token = d.pageToken;
+    while (token) {
+      btn.textContent = `Fetching ${Math.min(100, Math.round(rows.length / total * 100))}%…`;
+      const pg = await rawJson(`${API}?${new URLSearchParams({ action: 'export_page', jobId: d.jobId, location: d.location || '', pageToken: token, t: S.token })}`);
+      for (const x of pg.rows) rows.push(x); token = pg.pageToken;
+    }
+    if (!rows.length) { toast('No data for this scope', 'err'); return; }
+    const ws = XLSX.utils.aoa_to_sheet([['Client', 'FC', 'Date', 'Tracking ID', 'Shipment Type', 'VMS Scanned']].concat(rows));
+    ws['!cols'] = [{ wch: 22 }, { wch: 12 }, { wch: 22 }, { wch: 24 }, { wch: 15 }, { wch: 13 }];
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, kind === 'ob' ? 'Outbound' : 'Returns');
+    XLSX.writeFile(wb, `VMS_${kind === 'ob' ? 'Outbound' : 'Returns'}_MTD_${r.from}_to_${r.to}_${scope === 'ALL' ? 'AllFCs' : scope}.xlsx`);
+    toast(`Excel exported — ${fmt(rows.length)} rows`, 'ok');
+  } catch (e) { toast(e.message, 'err'); }
+  finally { btn.disabled = false; btn.innerHTML = label; }
+}
+async function rpSchedLoad() {
+  const h = $('rpSchedHour');
+  if (!h.options.length) for (let i = 0; i < 24; i++) h.add(new Option((i % 12 || 12) + ':00 ' + (i < 12 ? 'AM' : 'PM'), i));
+  try {
+    const s = await rawApi('report_schedule_get', { t: S.token });
+    $('rpSchedOn').checked = s.enabled; h.value = s.hour;
+    ['rpSchedOn', 'rpSchedHour', 'rpSchedSave'].forEach(id => $(id).disabled = !s.canEdit);
+    $('rpSchedNote').textContent = s.canEdit ? (s.enabled ? 'Active — every Monday ' + h.options[h.selectedIndex].text + ' IST' : 'Currently off') : (s.enabled ? 'Active — every Monday ' + h.options[h.selectedIndex].text + ' IST (only the primary admin can change this)' : 'Off — only the primary admin can change this');
+  } catch (e) { $('rpSchedNote').textContent = e.message; }
+}
+async function rpSchedSave() {
+  const b = $('rpSchedSave'); b.disabled = true; b.textContent = 'Saving…';
+  try {
+    await rawApi('report_schedule_set', { t: S.token, enabled: $('rpSchedOn').checked ? 'Y' : 'N', hour: $('rpSchedHour').value });
+    toast('Schedule saved', 'ok'); await rpSchedLoad();
+  } catch (e) { toast(e.message, 'err'); }
+  finally { b.disabled = false; b.textContent = 'Save schedule'; }
 }
 
 // ================= table sizing: fit to content, scroll only when long =================
