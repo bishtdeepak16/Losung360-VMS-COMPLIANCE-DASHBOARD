@@ -807,11 +807,11 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
     <div class="tab-panel" id="tab-report">
       <div class="sec-card">
         <div class="sec-head tbl-head">
-          <div class="sec-titles"><div class="sec-title">AI Report</div><div class="sec-sub">A brief, colourful performance review written by Groq AI from your BigQuery numbers — MTD, YTD and week-wise. Preview it here, then email it.</div></div>
+          <div class="sec-titles"><div class="sec-title">AI Report</div><div class="sec-sub">A brief, colourful performance review written by Groq AI from your BigQuery numbers — MTD, YTD and week-wise. "All FCs" goes to all admins; a single FC goes to that FC's users, with only that FC's data.</div></div>
         </div>
         <div class="rp-ctl">
           <div class="rp-field"><label>Report for</label><select id="rpScope" onchange="rpScopeChanged()"><option value="ALL">All FCs — admin overview</option></select></div>
-          <label class="up-check"><input type="checkbox" id="rpExcel" checked> Attach raw MTD Excel (Outbound &amp; Returns)</label>
+          <div class="rp-field"><label>Raw MTD Excel</label><select id="rpExcelMode" onchange="if(RP.last)rpGenerate()"><option value="attach">Attach Excel files</option><option value="link">Download links in email body</option><option value="none">No Excel</option></select></div>
           <label class="up-check" id="rpCopyWrap" style="display:none"><input type="checkbox" id="rpCopy" onchange="rpGenerate()"> Also copy admins</label>
           <button class="auth-btn sm" id="rpGen" onclick="rpGenerate()">✦ Generate report</button>
         </div>
@@ -832,11 +832,13 @@ body{background:radial-gradient(1200px 500px at 85% -10%,#E3EEFF 0%,transparent 
       </div>
       <div class="sec-card">
         <div class="sec-head tbl-head">
-          <div class="sec-titles"><div class="sec-title">Automatic weekly email</div><div class="sec-sub">Every Monday the full report goes to all admins and each FC's users (with their raw MTD Excel) — sent from the primary admin's account.</div></div>
+          <div class="sec-titles"><div class="sec-title">Automatic weekly email</div><div class="sec-sub">Every Monday the All-FC report is generated and sent to all admins — from the primary admin's account. Optionally each FC's own report goes to its users too.</div></div>
         </div>
         <div class="rp-ctl">
           <label class="up-check"><input type="checkbox" id="rpSchedOn"> Send automatically every Monday</label>
           <div class="rp-field"><label>Time (IST)</label><select id="rpSchedHour"></select></div>
+          <div class="rp-field"><label>Raw Excel</label><select id="rpSchedExcel"><option value="attach">Attach Excel files</option><option value="link">Download links in email body</option><option value="none">No Excel</option></select></div>
+          <label class="up-check"><input type="checkbox" id="rpSchedFc" checked> Also send each FC its own report</label>
           <button class="auth-btn sm" id="rpSchedSave" onclick="rpSchedSave()">Save schedule</button>
           <span class="rp-note" id="rpSchedNote"></span>
         </div>
@@ -1701,7 +1703,7 @@ async function rpGenerate() {
   const btn = $('rpGen'), scope = $('rpScope').value;
   btn.disabled = true; btn.textContent = 'Analysing with AI…';
   try {
-    const r = await rawApi('report_preview', { t: S.token, scope, copyAdmins: scope !== 'ALL' && $('rpCopy').checked ? 'Y' : 'N' });
+    const r = await rawApi('report_preview', { t: S.token, scope, excel: $('rpExcelMode').value, copyAdmins: scope !== 'ALL' && $('rpCopy').checked ? 'Y' : 'N' });
     RP.last = { scope, r };
     $('rpTitle').textContent = (scope === 'ALL' ? 'All FCs' : scope) + ' — report preview';
     $('rpSub').textContent = 'MTD ' + r.mtd + ' · subject: ' + r.subject;
@@ -1710,9 +1712,12 @@ async function rpGenerate() {
     if (!r.ai) toast(r.aiError || 'AI summary unavailable — rule-based summary used', 'err');
     const admins = r.recipients.filter(x => x.kind === 'admin'), fcu = r.recipients.filter(x => x.kind === 'fc');
     $('rpRecips').innerHTML = r.recipients.length
-      ? `<b>Will be emailed to ${r.recipients.length}:</b> ${admins.length} admin${admins.length === 1 ? '' : 's'} · ${fcu.length} FC user${fcu.length === 1 ? '' : 's'}<br>` +
+      ? `<b>${scope === 'ALL' ? 'Goes to all admins' : 'Goes to ' + scope + ' users'} (${r.recipients.length}):</b><br>` +
         r.recipients.map(x => `<span class="rp-chip ${x.kind === 'admin' ? 'a' : ''}" title="${esc(x.email)}">${esc(x.name)} · ${esc(x.fcs)}</span>`).join('')
-      : '<span class="rp-bad">No recipients for this scope yet — add FC users in the User Panel.</span>';
+      : `<span class="rp-bad">${scope === 'ALL' ? 'No admins found.' : 'No users are assigned to ' + esc(scope) + ' yet — add them in the User Panel.'}</span>`;
+    const sb = $('rpSend'), nn = r.recipients.length;
+    sb.textContent = scope === 'ALL' ? `✉ Send to all admins (${nn})` : `✉ Send to all ${scope} users (${nn})`;
+    sb.disabled = !nn;
     $('rpOut').style.display = 'block';
     const f = $('rpFrame');
     f.onload = () => { try { f.style.height = (f.contentDocument.documentElement.scrollHeight + 8) + 'px'; } catch (e) {} };
@@ -1728,13 +1733,13 @@ async function rpSend() {
   if (!RP.last) return;
   const { scope, r } = RP.last, n = r.recipients.length;
   if (!n) { toast('No recipients for this scope — add FC users in the User Panel', 'err'); return; }
-  const excel = $('rpExcel').checked;
-  if (!confirm(`Send this report to ${n} recipient${n === 1 ? '' : 's'}${excel ? ', with raw MTD Excel attached' : ''}?\n\n` + r.recipients.map(x => `• ${x.name} <${x.email}> — ${x.fcs}`).join('\n'))) return;
+  const mode = $('rpExcelMode').value, modeTxt = mode === 'attach' ? ', with the raw MTD Excel attached' : mode === 'link' ? ', with Excel download links in the email' : '';
+  if (!confirm(`Send this ${scope === 'ALL' ? 'All-FC' : scope} report to ${n} recipient${n === 1 ? '' : 's'}${modeTxt}?` + (scope === 'ALL' ? '' : `\n(Excel data is filtered to ${scope} only.)`) + '\n\n' + r.recipients.map(x => `• ${x.name} <${x.email}>`).join('\n'))) return;
   const btn = $('rpSend'), label = btn.textContent;
-  btn.disabled = true; btn.textContent = excel ? 'Sending… (can take a few minutes)' : 'Sending…';
+  btn.disabled = true; btn.textContent = mode !== 'none' ? 'Sending… (can take a few minutes)' : 'Sending…';
   try {
-    const res = await rawApi('report_send', { t: S.token, scope, excel: excel ? 'Y' : 'N', copyAdmins: scope !== 'ALL' && $('rpCopy').checked ? 'Y' : 'N' });
-    $('rpRecips').innerHTML = `<span class="rp-ok">✓ ${res.sent} email${res.sent === 1 ? '' : 's'} sent</span>` + (res.ai ? '' : ' · AI summary was unavailable for some') +
+    const res = await rawApi('report_send', { t: S.token, scope, excel: mode, copyAdmins: scope !== 'ALL' && $('rpCopy').checked ? 'Y' : 'N' });
+    $('rpRecips').innerHTML = `<span class="rp-ok">✓ ${res.sent} email${res.sent === 1 ? '' : 's'} sent</span>` + (res.ai ? '' : ' · AI summary was unavailable for some') + (res.mode === 'link' ? ' · Excel sent as download links' : '') +
       (res.excelSkipped && res.excelSkipped.length ? ' · <span class="rp-bad">Excel skipped for some (size/time) — they were told to export from the dashboard</span>' : '') +
       (res.failed && res.failed.length ? `<br><span class="rp-bad">Failed: ${esc(res.failed.join('; '))}</span>` : '');
     toast(`Report sent to ${res.sent} recipient${res.sent === 1 ? '' : 's'}`, 'ok');
@@ -1767,15 +1772,15 @@ async function rpSchedLoad() {
   if (!h.options.length) for (let i = 0; i < 24; i++) h.add(new Option((i % 12 || 12) + ':00 ' + (i < 12 ? 'AM' : 'PM'), i));
   try {
     const s = await rawApi('report_schedule_get', { t: S.token });
-    $('rpSchedOn').checked = s.enabled; h.value = s.hour;
-    ['rpSchedOn', 'rpSchedHour', 'rpSchedSave'].forEach(id => $(id).disabled = !s.canEdit);
+    $('rpSchedOn').checked = s.enabled; h.value = s.hour; $('rpSchedExcel').value = s.excel || 'attach'; $('rpSchedFc').checked = s.fcUsers !== false;
+    ['rpSchedOn', 'rpSchedHour', 'rpSchedExcel', 'rpSchedFc', 'rpSchedSave'].forEach(id => $(id).disabled = !s.canEdit);
     $('rpSchedNote').textContent = s.canEdit ? (s.enabled ? 'Active — every Monday ' + h.options[h.selectedIndex].text + ' IST' : 'Currently off') : (s.enabled ? 'Active — every Monday ' + h.options[h.selectedIndex].text + ' IST (only the primary admin can change this)' : 'Off — only the primary admin can change this');
   } catch (e) { $('rpSchedNote').textContent = e.message; }
 }
 async function rpSchedSave() {
   const b = $('rpSchedSave'); b.disabled = true; b.textContent = 'Saving…';
   try {
-    await rawApi('report_schedule_set', { t: S.token, enabled: $('rpSchedOn').checked ? 'Y' : 'N', hour: $('rpSchedHour').value });
+    await rawApi('report_schedule_set', { t: S.token, enabled: $('rpSchedOn').checked ? 'Y' : 'N', hour: $('rpSchedHour').value, excel: $('rpSchedExcel').value, fcUsers: $('rpSchedFc').checked ? 'Y' : 'N' });
     toast('Schedule saved', 'ok'); await rpSchedLoad();
   } catch (e) { toast(e.message, 'err'); }
   finally { b.disabled = false; b.textContent = 'Save schedule'; }
