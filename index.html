@@ -1182,12 +1182,23 @@ async function loadAll() {
     await ensureTab(t);
   }
 }
+function resetScrollTop(name) {
+  const go = () => {
+    window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
+    const panel = document.getElementById('tab-' + name);
+    for (let e = panel; e; e = e.parentElement) if (e.scrollTop) e.scrollTop = 0;
+    document.querySelectorAll('.main, .content, .tab-panel').forEach(x => { x.scrollTop = 0; });
+    if (panel) panel.querySelectorAll('*').forEach(x => { if (x.scrollTop) x.scrollTop = 0; });
+  };
+  go(); requestAnimationFrame(go);
+}
 function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
   document.body.classList.toggle('tab-report', name === 'report');
+  resetScrollTop(name);
   ensureTab(name);
   setTimeout(() => Object.values(S.charts).forEach(c => c.resize()), 30);
 }
