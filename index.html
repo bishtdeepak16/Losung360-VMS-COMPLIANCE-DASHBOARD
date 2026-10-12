@@ -527,6 +527,12 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
 #diagBtn::after{width:7px;height:7px}
 .header .btn-refresh{height:40px;border-radius:12px;padding:0 18px;font-size:12.5px}
 @media(max-width:1100px){.btn-ghost.up-btn{padding:0 7px}}
+
+/* ---- charts: fixed-height containers, never size from the canvas (prevents shrinking) ---- */
+.chart-wrap{box-sizing:border-box;min-width:0;width:100%;overflow:hidden;position:relative}
+.chart-wrap:not(.tall){height:370px}
+.chart-wrap.tall{height:430px}
+.chart-wrap canvas{display:block;max-height:none!important}
 </style>
 <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
@@ -693,7 +699,7 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
       <div class="ms-dropdown" id="platformDd">
         <div class="ms-opts" id="platformOpts">
           <label class="ms-opt ms-all"><input type="checkbox" id="platformAllCb" checked onchange="msToggleAll('platform')"> All Platforms</label>
-          <label class="ms-opt"><input type="checkbox" value="FLIPKART" checked class="platform-cb" onchange="msUpdateBtn('platform')"> Flipkart</label>
+          <label class="ms-opt"><input type="checkbox" value="FKVMS" checked class="platform-cb" onchange="msUpdateBtn('platform')"> FKVMS</label>
           <label class="ms-opt"><input type="checkbox" value="SMOOTHOPS" checked class="platform-cb" onchange="msUpdateBtn('platform')"> SmoothOps</label>
         </div>
       </div>
@@ -748,7 +754,6 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         <div class="sec-head tbl-head">
           <div class="sec-titles"><div class="sec-title">Outbound Daily Trend — Volume &amp; Compliance %</div><div class="sec-sub">Daily shipments dispatched (bars) vs VMS compliance % (line)</div></div>
           <div class="sec-actions">
-            <button class="btn-export" onclick="exportChartData('ob-trend','OB_Daily_Trend')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="ch-ob-trend"></canvas></div>
@@ -798,7 +803,6 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         <div class="sec-head tbl-head">
           <div class="sec-titles"><div class="sec-title">Returns Daily Trend — Volume &amp; Compliance %</div><div class="sec-sub">Daily returns QC-completed (bars) vs VMS compliance % (line)</div></div>
           <div class="sec-actions">
-            <button class="btn-export" onclick="exportChartData('ret-trend','Returns_Daily_Trend')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="ch-ret-trend"></canvas></div>
@@ -812,7 +816,6 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
           <div class="sec-titles"><div class="sec-title">Outbound — Monthly Volume &amp; Compliance</div><div class="sec-sub">Shipments dispatched vs VMS-scanned, month by month (current year, Jan to today)</div></div>
           <div class="sec-actions">
             <span class="chip" id="ob-ytd-total">—</span><span class="chip g" id="ob-ytd-pct">—</span>
-            <button class="btn-export" onclick="exportChartData('ob-monthly','Outbound_Monthly')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
         <div class="chart-wrap tall"><canvas id="ch-ob-monthly"></canvas></div>
@@ -822,7 +825,6 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
           <div class="sec-titles"><div class="sec-title">Returns — Monthly Volume &amp; Compliance</div><div class="sec-sub">Returns QC-completed vs VMS-scanned, month by month (current year, Jan to today)</div></div>
           <div class="sec-actions">
             <span class="chip" id="ret-ytd-total">—</span><span class="chip g" id="ret-ytd-pct">—</span>
-            <button class="btn-export" onclick="exportChartData('ret-monthly','Returns_Monthly')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
         <div class="chart-wrap tall"><canvas id="ch-ret-monthly"></canvas></div>
@@ -835,7 +837,6 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         <div class="sec-head tbl-head">
           <div class="sec-titles"><div class="sec-title">OB Compliance — By Location → Client</div><div class="sec-sub">Shipments dispatched vs VMS-scanned · expand an FC to see the client-wise split</div></div>
           <div class="sec-actions">
-            <button class="btn-export" onclick="exportRaw('ob',this)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
         <div class="tbl-wrap">
@@ -852,7 +853,6 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         <div class="sec-head tbl-head">
           <div class="sec-titles"><div class="sec-title">Returns Compliance — By FC → Client</div><div class="sec-sub">Returns QC-completed vs VMS-scanned · expand an FC to see the client-wise split</div></div>
           <div class="sec-actions">
-            <button class="btn-export" onclick="exportRaw('ret',this)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
         <div class="tbl-wrap">
@@ -896,7 +896,7 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
       </div>
       <div class="sec-card">
         <div class="sec-head tbl-head">
-          <div class="sec-titles"><div class="sec-title">Automatic weekly email</div><div class="sec-sub">Every Monday the All-FC report is generated and sent to all admins — from the primary admin's account. Optionally each FC's own report goes to its users too.</div></div>
+          <div class="sec-titles"><div class="sec-title">Automatic weekly email</div><div class="sec-sub">Every Monday: trigger 1 sends the All-FC report (with Excel) to all admins; trigger 2, an hour later, sends each FC user their own FC report (with Excel of only their FC). Mails go out one by one.</div></div>
         </div>
         <div class="rp-ctl">
           <label class="up-check"><input type="checkbox" id="rpSchedOn"> Send automatically every Monday</label>
@@ -915,7 +915,6 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         <div class="sec-head tbl-head">
           <div class="sec-titles"><div class="sec-title">Outbound — Volume &amp; Compliance % by Client</div><div class="sec-sub">Shipment volume (bars) vs VMS compliance % (line) for each client</div></div>
           <div class="sec-actions">
-            <button class="btn-export" onclick="exportChartData('ob-client','OB_Client_Chart')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="ch-ob-client"></canvas></div>
@@ -924,7 +923,6 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         <div class="sec-head tbl-head">
           <div class="sec-titles"><div class="sec-title">Returns — Volume &amp; Compliance % by Client</div><div class="sec-sub">Return volume (bars) vs VMS compliance % (line) for each client</div></div>
           <div class="sec-actions">
-            <button class="btn-export" onclick="exportChartData('ret-client','Returns_Client_Chart')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="ch-ret-client"></canvas></div>
@@ -1048,9 +1046,9 @@ function getMs(name) {
 
 // ================= LINKED SLICERS (FC / Client / Channel / Platform) =================
 const CAS = { rows: null, dims: ['client', 'loc', 'channel', 'platform'], sel: { client: new Set(), loc: new Set(), channel: new Set(), platform: new Set() } };
-const PLAT_LABEL = { FLIPKART: 'Flipkart', SMOOTHOPS: 'SmoothOps', UNKNOWN: 'Unknown' };
+const PLAT_LABEL = { FKVMS: 'FKVMS', SMOOTHOPS: 'SmoothOps', UNKNOWN: 'Unknown' };
 const FLIPKART_CLIENTS = ['VELOCITY', 'NIPPON'];
-function platOf(ch, client) { return !ch ? 'UNKNOWN' : (ch === 'FLIPKART' && FLIPKART_CLIENTS.includes(String(client || '').trim().toUpperCase())) ? 'FLIPKART' : 'SMOOTHOPS'; }
+function platOf(ch, client) { return !ch ? 'UNKNOWN' : (ch === 'FLIPKART' && FLIPKART_CLIENTS.includes(String(client || '').trim().toUpperCase())) ? 'FKVMS' : 'SMOOTHOPS'; }
 function casInit(opts) {
   const rows = [], seen = new Set();
   [opts.outbound, opts.returns].forEach(o => ((o && o.rows) || []).forEach(r => {
@@ -1134,6 +1132,20 @@ function buildUrl(action, from, to) {
   if (S.token) p.set('t', S.token);
   return `${API}?${p}`;
 }
+// A single rejected request must not throw a valid user back to the sign-in page:
+// confirm with the server whether the session is really gone before logging out.
+async function handleAuthFail() {
+  let j = null;
+  for (let a = 0; a < 3; a++) {
+    try { j = await (await fetch(`${API}?${new URLSearchParams({ action: 'auth_me', t: S.token })}`)).json(); }
+    catch (e) { throw new Error('Network problem — please check your connection and try again.'); }
+    if (j && (j.ok || (j.error && j.error !== 'AUTH_REQUIRED'))) break;
+    await new Promise(r => setTimeout(r, 1200 * (a + 1)));
+  }
+  if (j && j.ok) throw new Error('That request was rejected — please try again.');
+  if (j && j.error && j.error !== 'AUTH_REQUIRED') throw new Error('Server is busy — please try again in a moment.');
+  sessionExpired(); throw new Error('Session expired — please sign in again.');
+}
 async function call(action, from, to) {
   const key = buildUrl(action, from, to);
   if (S.cache[key]) return S.cache[key];
@@ -1142,7 +1154,7 @@ async function call(action, from, to) {
   catch (e) { throw new Error('Cannot reach Apps Script Web App — deployment access must be "Anyone" and URL must be the latest /exec'); }
   if (!json.ok) {
     const m = String(json.error || 'API error');
-    if (m === 'AUTH_REQUIRED') { sessionExpired(); throw new Error('Session expired — please sign in again.'); }
+    if (m === 'AUTH_REQUIRED') await handleAuthFail();
     if (/BigQuery is not defined/i.test(m)) throw new Error('BigQuery service not enabled in Apps Script (Services → BigQuery API → Add, then deploy a new version).');
     throw new Error(m);
   }
@@ -1200,8 +1212,29 @@ function switchTab(name) {
   document.body.classList.toggle('tab-report', name === 'report');
   resetScrollTop(name);
   ensureTab(name);
-  setTimeout(() => Object.values(S.charts).forEach(c => c.resize()), 30);
+  window.fixCharts && window.fixCharts();
 }
+
+
+// ================= CHART SIZE GUARD =================
+// Re-measures every chart whenever its box changes size / a tab is shown / the window changes,
+// so a chart can never stay stuck at a stale (tiny) size.
+(function () {
+  let t = null;
+  const fix = () => {
+    Object.values(S.charts || {}).forEach(c => { try { if (c && c.canvas && c.canvas.isConnected && c.canvas.parentElement.clientWidth > 0) c.resize(); } catch (e) {} });
+  };
+  const soon = () => { clearTimeout(t); t = setTimeout(fix, 80); };
+  window.fixCharts = () => { fix(); [60, 250, 700, 1500].forEach(ms => setTimeout(fix, ms)); };
+  window.addEventListener('resize', soon);
+  window.addEventListener('orientationchange', soon);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) soon(); });
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(soon);
+    const watch = () => document.querySelectorAll('.chart-wrap').forEach(w => { if (!w.__ro) { w.__ro = 1; ro.observe(w); } });
+    watch(); setInterval(watch, 2000);
+  }
+})();
 
 // LOADERS — OUTBOUND
 async function loadObSummary() {
@@ -1418,6 +1451,7 @@ function drawMonthly(canvasId, m, totalLabel) {
   const g1 = ctx.createLinearGradient(0, 0, 0, 340); g1.addColorStop(0, '#FFA23F'); g1.addColorStop(1, '#F25C05');
   const g2 = ctx.createLinearGradient(0, 0, 0, 340); g2.addColorStop(0, '#5AA7FF'); g2.addColorStop(1, '#1D5FE8');
   const bar = { borderRadius: { topLeft: 9, topRight: 9 }, borderSkipped: false, barPercentage: .78, categoryPercentage: .72, yAxisID: 'y' };
+  setTimeout(() => window.fixCharts && window.fixCharts(), 0);
   S.charts[canvasId] = new Chart(el, {
     type: 'bar',
     plugins: [pctLabelPlugin],
@@ -1432,6 +1466,7 @@ function drawMonthly(canvasId, m, totalLabel) {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
+      transitions: { resize: { animation: { duration: 0 } } },
       interaction: { mode: 'index', intersect: false },
       animation: { duration: 700, easing: 'easeOutQuart' },
       layout: { padding: { top: 6 } },
@@ -1474,6 +1509,7 @@ function drawCombo(canvasId, data, xCol, barCol, lineCol, barHex, barLbl, lineLb
   grad.addColorStop(1, pal[1]);
   // line color: always bright orange for ob, cyan for returns
   const lineHex = barHex === '#FF7A1A' ? '#2563EB' : '#FF7A1A';
+  setTimeout(() => window.fixCharts && window.fixCharts(), 0);
   S.charts[canvasId] = new Chart(el, {
     type:'bar',
     data:{
@@ -1499,7 +1535,8 @@ function drawCombo(canvasId, data, xCol, barCol, lineCol, barHex, barLbl, lineLb
       ]
     },
     options:{
-      responsive:true,
+      responsive:true, maintainAspectRatio:false,
+      transitions:{resize:{animation:{duration:0}}},
       interaction:{mode:'index',intersect:false},
       animation:{duration:550,easing:'easeOutQuart'},
       plugins:{
@@ -1548,7 +1585,7 @@ async function rawJson(url) {
   catch (e) { throw new Error('Cannot reach Apps Script Web App'); }
   if (!json.ok) {
     const m = String(json.error || 'Export failed');
-    if (m === 'AUTH_REQUIRED') { sessionExpired(); throw new Error('Session expired — please sign in again.'); }
+    if (m === 'AUTH_REQUIRED') await handleAuthFail();
     if (/Unknown action/i.test(m)) throw new Error('Apps Script is old - paste the new Code.gs and deploy a new version (export actions missing).');
     throw new Error(m);
   }
@@ -1565,8 +1602,10 @@ async function exportRaw(kind, btn) {
     let token = d.pageToken;
     while (token) {
       btn.textContent = `Fetching ${Math.min(100, Math.round(rows.length / total * 100))}%…`;
-      const p = new URLSearchParams({ action: 'export_page', jobId: d.jobId, location: d.location || '', pageToken: token });
-      const pg = await rawJson(`${API}?${p}`);
+      const p = new URLSearchParams({ action: 'export_page', jobId: d.jobId, location: d.location || '', pageToken: token, t: S.token });
+      let pg, err;
+      for (let a = 0; a < 3; a++) { try { pg = await rawJson(`${API}?${p}`); err = null; break; } catch (e) { err = e; if (/Session expired/i.test(e.message || '')) break; await new Promise(r => setTimeout(r, 800 * (a + 1))); } }
+      if (err) throw err;
       for (const r of pg.rows) rows.push(r);
       token = pg.pageToken;
     }
@@ -1574,9 +1613,9 @@ async function exportRaw(kind, btn) {
     if (rows.length > 1048575) { toast('Too many rows for one Excel sheet — please narrow the date range', 'err'); return; }
     btn.textContent = 'Building Excel…';
     await new Promise(r => setTimeout(r, 30));
-    const aoa = [['Client','FC','Date','Tracking ID','Shipment Type','VMS Scanned']].concat(rows);
+    const aoa = [['Client','FC','Date','Tracking ID','Shipment Type','VMS Scanned','Platform']].concat(rows);
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws['!cols'] = [{wch:22},{wch:12},{wch:22},{wch:24},{wch:15},{wch:13}];
+    ws['!cols'] = [{wch:22},{wch:12},{wch:22},{wch:24},{wch:15},{wch:13},{wch:13}];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, kind === 'ob' ? 'Outbound' : 'Returns');
     XLSX.writeFile(wb, `VMS_${kind === 'ob' ? 'Outbound' : 'Returns'}_Raw_${S.from}_to_${S.to}.xlsx`);
@@ -1619,6 +1658,7 @@ async function loadFilterOptions() {
   try {
     const opts=await call('filter_options');
     S.allFcs=[...new Set([...(opts.outbound?.locations||[]),...(opts.returns?.fcs||[])])].sort();
+    S.mapFcs=(opts.mappedFcs||[]);
     const allClients =[...new Set([...(opts.outbound?.clients||[]),...(opts.returns?.clients||[])])].sort();
     const allLocs    =[...new Set([...(opts.outbound?.locations||[]),...(opts.returns?.fcs||[])])].sort();
     const allChannels=[...new Set([...(opts.outbound?.channels||[]),...(opts.returns?.channels||[])])].sort();
@@ -1844,8 +1884,8 @@ async function rpRaw(kind, btn) {
       for (const x of pg.rows) rows.push(x); token = pg.pageToken;
     }
     if (!rows.length) { toast('No data for this scope', 'err'); return; }
-    const ws = XLSX.utils.aoa_to_sheet([['Client', 'FC', 'Date', 'Tracking ID', 'Shipment Type', 'VMS Scanned']].concat(rows));
-    ws['!cols'] = [{ wch: 22 }, { wch: 12 }, { wch: 22 }, { wch: 24 }, { wch: 15 }, { wch: 13 }];
+    const ws = XLSX.utils.aoa_to_sheet([['Client', 'FC', 'Date', 'Tracking ID', 'Shipment Type', 'VMS Scanned', 'Platform']].concat(rows));
+    ws['!cols'] = [{ wch: 22 }, { wch: 12 }, { wch: 22 }, { wch: 24 }, { wch: 15 }, { wch: 13 }, { wch: 13 }];
     const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, kind === 'ob' ? 'Outbound' : 'Returns');
     XLSX.writeFile(wb, `VMS_${kind === 'ob' ? 'Outbound' : 'Returns'}_MTD_${r.from}_to_${r.to}_${scope === 'ALL' ? 'AllFCs' : scope}.xlsx`);
     toast(`Excel exported — ${fmt(rows.length)} rows`, 'ok');
@@ -1916,7 +1956,7 @@ function renderUsers() {
   $('upList').innerHTML = h;
 }
 function upFcList(extra) {
-  return [...new Set([...(S.allFcs || []), ...(extra || [])].filter(f => f && f !== 'ALL'))].sort();
+  return [...new Set([...(S.allFcs || []), ...(S.mapFcs || []), ...(extra || [])].filter(f => f && f !== 'ALL'))].sort();
 }
 function upEdit(enc) {
   const u = enc ? UP.users.find(x => x.email === decodeURIComponent(enc)) : null;
