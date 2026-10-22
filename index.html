@@ -160,6 +160,35 @@ button,input,select{font-family:inherit}
 .cpill.lo{background:var(--red-bg);color:#B42318}
 .cpill::before{content:'●';font-size:7px}
 
+
+/* COMPARE (WoW / MoM) */
+.cmp-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 14px}
+.cmp-pills{display:inline-flex;background:#fff;border:1px solid var(--border);border-radius:99px;padding:4px;box-shadow:var(--shadow-sm)}
+.cmp-pill{border:none;background:transparent;padding:8px 22px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.6px;color:var(--text-2);cursor:pointer;transition:all .18s}
+.cmp-pill:hover{color:var(--orange-dk)}
+.cmp-pill.active{background:linear-gradient(135deg,var(--orange-2),var(--orange-dk));color:#fff;box-shadow:var(--shadow-ora)}
+.cmp-note{font-size:11.5px;color:var(--text-2)}
+.cmp-note b{color:var(--text-1)}
+.cmp-tbl thead th{vertical-align:bottom;line-height:1.35}
+.cmp-tbl thead th small{display:block;font-size:9.5px;font-weight:600;color:#7C93B5;letter-spacing:.3px;text-transform:none}
+.cmp-tbl thead th.l{text-align:left}
+.cmp-tbl tbody td.l{text-align:left}
+.cmp-tbl .cur-cell{white-space:nowrap}
+.dlt{display:inline-flex;align-items:center;gap:2px;margin-left:8px;padding:1px 7px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.2px}
+.dlt.up{background:var(--green-bg);color:#0B7A47}
+.dlt.down{background:var(--red-bg);color:#B42318}
+.dlt.flat{background:#EEF2F7;color:#64748B}
+.dlt.new{background:var(--orange-lt);color:var(--orange-dk)}
+.cmp-tbl .prev-cell .cpill{opacity:.8}
+.cmp-tbl .fc-tag{display:inline-flex;align-items:center;font-weight:700;letter-spacing:.2px}
+.cmp-tbl .fc-tag i{font-style:normal;margin-left:6px;padding:1px 7px;border-radius:6px;background:var(--blue-lt);color:var(--blue-dk);font-size:10.5px;font-weight:700}
+.cmp-tbl .sub-row td:first-child{padding-left:20px}
+.cmp-tbl .sub-row td:first-child::before{display:none!important;content:none!important}
+.cmp-tbl .grand-row td{color:#fff!important}
+.cmp-tbl .sub-row td.cl{color:var(--text-2);padding-left:32px;text-align:left}
+.cmp-tbl .grp-hdr td:first-child{display:table-cell;border-left:3px solid var(--orange)}
+.cmp-tbl .grp-hdr td.cl{text-align:left;color:var(--text-2);font-weight:500;font-size:12px}
+
 /* CHART */
 .chart-wrap{padding:16px 20px 20px;position:relative}
 .chart-wrap canvas{max-height:320px}
@@ -615,6 +644,9 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
     <button class="nav-item" id="nav-bylocation" onclick="switchTab('bylocation')">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> By Location
     </button>
+    <button class="nav-item" id="nav-compare" onclick="switchTab('compare')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> W-O-W &amp; M-O-M
+    </button>
     <button class="nav-item" id="nav-clients" onclick="switchTab('clients')">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> By Client
     </button>
@@ -867,6 +899,55 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
       </div>
     </div>
 
+    <!-- ══ WoW / MoM ══ -->
+    <div class="tab-panel" id="tab-compare">
+      <div class="cmp-bar">
+        <div class="cmp-pills">
+          <button class="cmp-pill active" id="cmp-pill-wow" onclick="setCmpMode('wow')">W-O-W</button>
+          <button class="cmp-pill" id="cmp-pill-mom" onclick="setCmpMode('mom')">M-O-M</button>
+        </div>
+        <div class="cmp-note" id="cmp-note"></div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-head tbl-head">
+          <div class="sec-titles"><div class="sec-title">Outbound — Compliance Comparison</div><div class="sec-sub" id="cmp-ob-sub">Shipments dispatched vs VMS-scanned · FC → Client</div></div>
+          <div class="sec-actions">
+            <button class="btn-export" onclick="exportCmp('ob',this)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="pivot cmp-tbl">
+            <thead><tr>
+              <th class="l" style="width:150px">FC</th><th class="l">Client</th>
+              <th>Total Shipments<small id="cmp-ob-th-t">&nbsp;</small></th><th>Scanned<small>&nbsp;</small></th>
+              <th>VMS Compliance % <span id="cmp-ob-lc">(—)</span><small id="cmp-ob-rc">&nbsp;</small></th>
+              <th>VMS Compliance % <span id="cmp-ob-lp">(—)</span><small id="cmp-ob-rp">&nbsp;</small></th>
+            </tr></thead>
+            <tbody id="tb-cmp-ob"><tr><td colspan="6"><div class="skel" style="height:190px"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-head tbl-head">
+          <div class="sec-titles"><div class="sec-title">Returns — Compliance Comparison</div><div class="sec-sub" id="cmp-ret-sub">Returns QC-completed vs VMS-scanned · FC → Client</div></div>
+          <div class="sec-actions">
+            <button class="btn-export" onclick="exportCmp('ret',this)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="pivot cmp-tbl">
+            <thead><tr>
+              <th class="l" style="width:150px">FC</th><th class="l">Client</th>
+              <th>Total Returns<small id="cmp-ret-th-t">&nbsp;</small></th><th>Scanned<small>&nbsp;</small></th>
+              <th>VMS Compliance % <span id="cmp-ret-lc">(—)</span><small id="cmp-ret-rc">&nbsp;</small></th>
+              <th>VMS Compliance % <span id="cmp-ret-lp">(—)</span><small id="cmp-ret-rp">&nbsp;</small></th>
+            </tr></thead>
+            <tbody id="tb-cmp-ret"><tr><td colspan="6"><div class="skel" style="height:190px"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ AI REPORT (admins) ══ -->
     <div class="tab-panel" id="tab-report">
       <div class="sec-card">
@@ -896,10 +977,10 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
       </div>
       <div class="sec-card">
         <div class="sec-head tbl-head">
-          <div class="sec-titles"><div class="sec-title">Automatic weekly email</div><div class="sec-sub">Every Monday: trigger 1 sends the All-FC report (with Excel) to all admins; trigger 2, an hour later, sends each FC user their own FC report (with Excel of only their FC). Mails go out one by one.</div></div>
+          <div class="sec-titles"><div class="sec-title">Automatic weekly email</div><div class="sec-sub">Every Monday and Thursday: trigger 1 sends the All-FC report (with Excel) to all admins; trigger 2, an hour later, sends each FC user their own FC report (with Excel of only their FC). Mails go out one by one.</div></div>
         </div>
         <div class="rp-ctl">
-          <label class="up-check"><input type="checkbox" id="rpSchedOn"> Send automatically every Monday</label>
+          <label class="up-check"><input type="checkbox" id="rpSchedOn"> Send automatically every Monday &amp; Thursday</label>
           <div class="rp-field"><label>Time (IST)</label><select id="rpSchedHour"></select></div>
           <div class="rp-field"><label>Raw Excel</label><select id="rpSchedExcel"><option value="attach">Attach Excel files</option><option value="link">Download links in email body</option><option value="none">No Excel</option></select></div>
           <label class="up-check"><input type="checkbox" id="rpSchedFc" checked> Also send each FC its own report</label>
@@ -1130,6 +1211,7 @@ function buildUrl(action, from, to) {
   if (S.platforms.length) p.set('platform', S.platforms.join(','));
   if (S.locs.length) p.set('locs', S.locs.join(','));
   if (S.token) p.set('t', S.token);
+  if (action.indexOf('cmp_') === 0) p.set('mode', S.cmpMode || 'wow');
   return `${API}?${p}`;
 }
 // A single rejected request must not throw a valid user back to the sign-in page:
@@ -1164,12 +1246,13 @@ async function call(action, from, to) {
 
 // ORCHESTRATION
 function callPrev(action) { return call(action, shiftMonth(S.from,-1), shiftMonth(S.to,-1)).catch(() => null); }
-const TAB_ORDER = ['outbound','returns','trends','bylocation','clients'];
+const TAB_ORDER = ['outbound','returns','trends','bylocation','compare','clients'];
 const TAB_JOBS = {
   outbound:   () => Promise.allSettled([loadObSummary(),  loadObByClient(),  loadObTrend()]),
   returns:    () => Promise.allSettled([loadRetSummary(), loadRetByClient(), loadRetTrend()]),
   trends:     () => Promise.allSettled([loadObMonthly(),  loadRetMonthly()]),
   bylocation: () => Promise.allSettled([loadObByLoc(),    loadRetByLoc()]),
+  compare:    () => loadCompare(),
   clients:    () => Promise.allSettled([loadObClientChart(), loadRetClientChart()]),
   report:     () => Promise.resolve()
 };
@@ -1591,12 +1674,13 @@ async function rawJson(url) {
   }
   return json.data;
 }
-async function exportRaw(kind, btn) {
+async function exportRaw(kind, btn, range) {
   if (btn.disabled) return;
+  const xFrom = range ? range.from : S.from, xTo = range ? range.to : S.to;
   const label = btn.innerHTML;
   btn.disabled = true; btn.textContent = 'Preparing…';
   try {
-    let d = await rawJson(buildUrl(kind + '_export'));
+    let d = await rawJson(buildUrl(kind + '_export', xFrom, xTo));
     const rows = d.rows.slice();
     const total = d.total || rows.length;
     let token = d.pageToken;
@@ -1618,7 +1702,7 @@ async function exportRaw(kind, btn) {
     ws['!cols'] = [{wch:22},{wch:12},{wch:22},{wch:24},{wch:15},{wch:13},{wch:13}];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, kind === 'ob' ? 'Outbound' : 'Returns');
-    XLSX.writeFile(wb, `VMS_${kind === 'ob' ? 'Outbound' : 'Returns'}_Raw_${S.from}_to_${S.to}.xlsx`);
+    XLSX.writeFile(wb, `VMS_${kind === 'ob' ? 'Outbound' : 'Returns'}_Raw_${range && range.tag ? range.tag + '_' : ''}${xFrom}_to_${xTo}.xlsx`);
     toast(`Excel exported — ${fmt(rows.length)} rows`, 'ok');
   } catch (e) { toast(e.message, 'err'); }
   finally { btn.disabled = false; btn.innerHTML = label; }
@@ -1666,6 +1750,74 @@ async function loadFilterOptions() {
     if (CAS.rows) casRefresh(null);
     else { buildMs('client', allClients); buildMs('loc', allLocs); buildMs('channel', allChannels); }
   } catch(e){toast('Could not load filters: '+e.message,'err');}
+}
+
+
+// ================= WoW / MoM COMPARISON =================
+const FC_CODES = { GGN:'G1', BNG:'B1', HYD:'H3', MUM:'M4', KOL:'K3', CHN:'C3', CHE:'C3' };
+function fcTag(fc){ const c = FC_CODES[String(fc).toUpperCase()]; return `<span class="fc-tag">${esc(fc)}${c ? `<i>${c}</i>` : ''}</span>`; }
+function dltChip(cur, prev){
+  if (cur == null) return '';
+  if (prev == null) return '<span class="dlt new">NEW</span>';
+  const d = cur - prev;
+  if (Math.abs(d) < 0.05) return '<span class="dlt flat" title="No change">● 0.0 pp</span>';
+  return `<span class="dlt ${d > 0 ? 'up' : 'down'}" title="${d > 0 ? '+' : ''}${d.toFixed(2)} percentage points vs previous period">${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(1)} pp</span>`;
+}
+function exportCmp(kind, btn){
+  const M = S.cmpMeta;
+  if (!M) { toast('Table is still loading — please try again in a moment', 'err'); return; }
+  exportRaw(kind, btn, { from: M.cs, to: M.ce, tag: M.curLabel.replace(/\s+/g, '_') });
+}
+function setCmpMode(m){
+  if (S.cmpMode === m && S.tabs.compare) return;
+  S.cmpMode = m;
+  document.getElementById('cmp-pill-wow').classList.toggle('active', m === 'wow');
+  document.getElementById('cmp-pill-mom').classList.toggle('active', m === 'mom');
+  delete S.tabs.compare;
+  ensureTab('compare');
+}
+async function loadCompare(){
+  S.cmpMode = S.cmpMode || 'wow';
+  ['ob','ret'].forEach(k => { document.getElementById('tb-cmp-' + k).innerHTML = '<tr><td colspan="6"><div class="skel" style="height:190px"></div></td></tr>'; });
+  const mode = S.cmpMode;
+  await Promise.allSettled(['ob','ret'].map(async k => {
+    try { const d = await call('cmp_' + k); if (mode === S.cmpMode) renderCmp(k, d); }
+    catch(e) { errTbl('tb-cmp-' + k, e); }
+  }));
+}
+function renderCmp(k, d){
+  const M = d.meta, rows = d.rows || [], tb = document.getElementById('tb-cmp-' + k);
+  S.cmpMeta = M;
+  const wow = M.mode === 'wow';
+  document.getElementById('cmp-' + k + '-lc').textContent = '(' + M.curLabel + ')';
+  document.getElementById('cmp-' + k + '-lp').textContent = '(' + M.prevLabel + ')';
+  document.getElementById('cmp-' + k + '-rc').textContent = M.curRange;
+  document.getElementById('cmp-' + k + '-rp').textContent = M.prevRange;
+  document.getElementById('cmp-' + k + '-th-t').textContent = M.curLabel + ' · ' + M.curRange;
+  document.getElementById('cmp-note').innerHTML = wow
+    ? `Last completed week <b>${esc(M.curLabel)}</b> (${esc(M.curRange)}) vs <b>${esc(M.prevLabel)}</b> (${esc(M.prevRange)}) · change shown in percentage points`
+    : `<b>${esc(M.curLabel)}</b> (${esc(M.curRange)}) vs <b>${esc(M.prevLabel)}</b> (${esc(M.prevRange)}) · same day range · change shown in percentage points`;
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">No data for selected filters</td></tr>'; return; }
+  const pc = (t, s) => t > 0 ? s / t * 100 : null;
+  const cell = p => p == null ? '<span class="cpill md">—</span>' : cpill(p);
+  const g = {};
+  rows.forEach(r => { (g[r.fc] = g[r.fc] || []).push({ client: r.client, ct: num(r.ct), cs: num(r.cs), pt: num(r.pt), ps: num(r.ps) }); });
+  const list = Object.entries(g).map(([fc, rs]) => ({ fc, rs, ct: rs.reduce((a, r) => a + r.ct, 0), cs: rs.reduce((a, r) => a + r.cs, 0), pt: rs.reduce((a, r) => a + r.pt, 0), ps: rs.reduce((a, r) => a + r.ps, 0) }))
+    .sort((a, b) => b.ct - a.ct || a.fc.localeCompare(b.fc));
+  let html = '', T = { ct: 0, cs: 0, pt: 0, ps: 0 };
+  const line = (cls, a, b, o) => { const cp = pc(o.ct, o.cs), pp = pc(o.pt, o.ps);
+    return `${a}<td>${fmt(o.ct)}</td><td>${fmt(o.cs)}</td><td class="cur-cell">${cell(cp)}${dltChip(cp, pp)}</td><td class="prev-cell">${cell(pp)}</td></tr>`; };
+  list.forEach(o => {
+    T.ct += o.ct; T.cs += o.cs; T.pt += o.pt; T.ps += o.ps;
+    const gid = 'g_cmp_' + k + '_' + o.fc.replace(/\W/g, '_');
+    html += line('', `<tr class="grp-hdr" id="${gid}_hdr" onclick="toggleGrp('${gid}')"><td class="l"><span class="expand-btn" id="${gid}_tog" style="margin-right:8px">▾</span>${fcTag(o.fc)}</td><td class="cl">All clients</td>`, '', o);
+    o.rs.slice().sort((a, b) => b.ct - a.ct || a.client.localeCompare(b.client)).forEach(r => {
+      html += line('', `<tr class="sub-row" data-gid="${gid}"><td></td><td class="cl">${esc(r.client)}</td>`, '', r);
+    });
+  });
+  html += line('', '<tr class="grand-row"><td class="l">Grand Total</td><td></td>', '', T);
+  tb.innerHTML = html;
+  fitTbl('tb-cmp-' + k);
 }
 
 // HELPERS
@@ -1899,7 +2051,7 @@ async function rpSchedLoad() {
     const s = await rawApi('report_schedule_get', { t: S.token });
     $('rpSchedOn').checked = s.enabled; h.value = s.hour; $('rpSchedExcel').value = s.excel || 'attach'; $('rpSchedFc').checked = s.fcUsers !== false;
     ['rpSchedOn', 'rpSchedHour', 'rpSchedExcel', 'rpSchedFc', 'rpSchedSave'].forEach(id => $(id).disabled = !s.canEdit);
-    $('rpSchedNote').textContent = s.canEdit ? (s.enabled ? 'Active — every Monday ' + h.options[h.selectedIndex].text + ' IST' : 'Currently off') : (s.enabled ? 'Active — every Monday ' + h.options[h.selectedIndex].text + ' IST (only the primary admin can change this)' : 'Off — only the primary admin can change this');
+    $('rpSchedNote').textContent = s.canEdit ? (s.enabled ? 'Active — every Mon & Thu ' + h.options[h.selectedIndex].text + ' IST' : 'Currently off') : (s.enabled ? 'Active — every Monday ' + h.options[h.selectedIndex].text + ' IST (only the primary admin can change this)' : 'Off — only the primary admin can change this');
   } catch (e) { $('rpSchedNote').textContent = e.message; }
 }
 async function rpSchedSave() {
