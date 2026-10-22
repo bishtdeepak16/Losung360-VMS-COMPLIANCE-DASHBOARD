@@ -174,10 +174,11 @@ button,input,select{font-family:inherit}
 .cmp-tbl thead th.l{text-align:left}
 .cmp-tbl thead th.l+th.l{text-align:left}
 .cmp-tbl thead th .hd-main{display:block;white-space:nowrap}
-.cmp-tbl thead th#cmp-th-tot,.cmp-tbl thead th.wrapok{white-space:normal}
-.cmp-tbl thead th .hd-sub{display:inline-block;margin-top:5px;padding:2px 8px;border-radius:99px;background:#E6EEFB;color:#3F5A82;font-size:9.5px;font-weight:700;letter-spacing:.2px;text-transform:none;white-space:nowrap}
+.cmp-tbl thead th.wrapok,.cmp-tbl thead th.wrapok .hd-main{white-space:normal}
+.cmp-tbl thead th .hd-sub{display:inline-block;max-width:100%;margin-top:5px;padding:2px 8px;line-height:1.25;border-radius:10px;background:#E6EEFB;color:#3F5A82;font-size:9.5px;font-weight:700;letter-spacing:.2px;text-transform:none;white-space:normal}
 .cmp-tbl thead th.cur .hd-sub{background:var(--orange-lt);color:var(--orange-dk)}
-.cmp-tbl tbody td{padding:9px 8px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.cmp-tbl tbody td{padding:9px 8px;overflow:hidden;text-overflow:clip;vertical-align:middle}
+.cmp-tbl tbody td:first-child{overflow:visible;white-space:nowrap}
 .cmp-tbl tbody td:not(:first-child):not(.cl){text-align:center}
 .cmp-tbl tbody td.l{text-align:left;white-space:nowrap}
 .cmp-tbl .cur-cell{white-space:nowrap}
@@ -198,7 +199,7 @@ button,input,select{font-family:inherit}
 .cmp-tbl .cpill{box-sizing:border-box;width:68px;height:22px;padding:0;justify-content:center;font-size:11px;line-height:22px}
 /* never clip: below ~1050px of table width the table scrolls sideways instead */
 .cmp-wrap{overflow-x:auto!important}
-.cmp-tbl{min-width:980px}
+.cmp-tbl{min-width:1000px}
 
 /* CHART */
 .chart-wrap{padding:16px 20px 20px;position:relative}
@@ -928,10 +929,10 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         </div>
         <div class="tbl-wrap cmp-wrap">
           <table class="pivot cmp-tbl">
-            <colgroup><col style="width:11%"><col style="width:14%"><col style="width:10%"><col style="width:9%"><col style="width:20%"><col style="width:20%"><col style="width:16%"></colgroup>
+            <colgroup><col style="width:13%"><col style="width:12%"><col style="width:10%"><col style="width:8%"><col style="width:19%"><col style="width:19%"><col style="width:19%"></colgroup>
             <thead><tr>
               <th class="l">FC</th><th class="l">Client</th>
-              <th><span class="hd-main">Total Shipments</span></th><th><span class="hd-main">Scanned</span></th>
+              <th class="wrapok"><span class="hd-main">Total Shipments</span></th><th class="wrapok"><span class="hd-main">Scanned</span></th>
               <th class="cur"><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ob-hc">—</span></th>
               <th><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ob-hp">—</span></th>
               <th><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ob-hq">—</span></th>
@@ -949,10 +950,10 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         </div>
         <div class="tbl-wrap cmp-wrap">
           <table class="pivot cmp-tbl">
-            <colgroup><col style="width:11%"><col style="width:14%"><col style="width:10%"><col style="width:9%"><col style="width:20%"><col style="width:20%"><col style="width:16%"></colgroup>
+            <colgroup><col style="width:13%"><col style="width:12%"><col style="width:10%"><col style="width:8%"><col style="width:19%"><col style="width:19%"><col style="width:19%"></colgroup>
             <thead><tr>
               <th class="l">FC</th><th class="l">Client</th>
-              <th><span class="hd-main">Total Returns</span></th><th><span class="hd-main">Scanned</span></th>
+              <th class="wrapok"><span class="hd-main">Total Returns</span></th><th class="wrapok"><span class="hd-main">Scanned</span></th>
               <th class="cur"><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ret-hc">—</span></th>
               <th><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ret-hp">—</span></th>
               <th><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ret-hq">—</span></th>
@@ -1826,7 +1827,7 @@ function renderCmp(k, d){
   list.forEach(o => {
     T.ct += o.ct; T.cs += o.cs; T.pt += o.pt; T.ps += o.ps; T.qt += o.qt; T.qs += o.qs;
     const gid = 'g_cmp_' + k + '_' + o.fc.replace(/\W/g, '_');
-    html += line('', `<tr class="grp-hdr" id="${gid}_hdr" onclick="toggleGrp('${gid}')"><td class="l"><span class="expand-btn" id="${gid}_tog" style="margin-right:8px">▾</span>${fcTag(o.fc)}</td><td class="cl">All clients</td>`, '', o);
+    html += line('', `<tr class="grp-hdr" id="${gid}_hdr" onclick="toggleGrp('${gid}')"><td class="l"><span class="expand-btn" id="${gid}_tog" style="margin-right:6px">▾</span>${fcTag(o.fc)}</td><td class="cl">All clients</td>`, '', o);
     o.rs.slice().sort((a, b) => b.ct - a.ct || a.client.localeCompare(b.client)).forEach(r => {
       html += line('', `<tr class="sub-row" data-gid="${gid}"><td></td><td class="cl">${esc(r.client)}</td>`, '', r);
     });
