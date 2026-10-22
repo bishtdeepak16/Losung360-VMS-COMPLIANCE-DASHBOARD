@@ -169,25 +169,31 @@ button,input,select{font-family:inherit}
 .cmp-pill.active{background:linear-gradient(135deg,var(--orange-2),var(--orange-dk));color:#fff;box-shadow:var(--shadow-ora)}
 .cmp-note{font-size:11.5px;color:var(--text-2)}
 .cmp-note b{color:var(--text-1)}
-.cmp-tbl thead th{vertical-align:bottom;line-height:1.35}
-.cmp-tbl thead th small{display:block;font-size:9.5px;font-weight:600;color:#7C93B5;letter-spacing:.3px;text-transform:none}
+.cmp-wrap{overflow-x:hidden!important}
+.cmp-tbl{table-layout:fixed;width:100%}
+.cmp-tbl thead th{padding:10px 12px;vertical-align:middle;line-height:1.3;white-space:normal}
 .cmp-tbl thead th.l{text-align:left}
-.cmp-tbl tbody td.l{text-align:left}
+.cmp-tbl thead th .hd-main{display:block}
+.cmp-tbl thead th .hd-sub{display:inline-block;margin-top:5px;padding:2px 8px;border-radius:99px;background:#E6EEFB;color:#3F5A82;font-size:9.5px;font-weight:700;letter-spacing:.2px;text-transform:none;white-space:nowrap}
+.cmp-tbl thead th.cur .hd-sub{background:var(--orange-lt);color:var(--orange-dk)}
+.cmp-tbl tbody td{padding:9px 12px;overflow:hidden;text-overflow:ellipsis}
+.cmp-tbl tbody td.l{text-align:left;white-space:nowrap}
 .cmp-tbl .cur-cell{white-space:nowrap}
-.dlt{display:inline-flex;align-items:center;gap:2px;margin-left:8px;padding:1px 7px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.2px}
+.dlt{display:inline-flex;align-items:center;gap:2px;margin-left:6px;padding:0 5px;border-radius:4px;font-size:9px;line-height:16px;font-weight:700;letter-spacing:.1px;vertical-align:middle}
 .dlt.up{background:var(--green-bg);color:#0B7A47}
 .dlt.down{background:var(--red-bg);color:#B42318}
 .dlt.flat{background:#EEF2F7;color:#64748B}
 .dlt.new{background:var(--orange-lt);color:var(--orange-dk)}
 .cmp-tbl .prev-cell .cpill{opacity:.8}
-.cmp-tbl .fc-tag{display:inline-flex;align-items:center;font-weight:700;letter-spacing:.2px}
-.cmp-tbl .fc-tag i{font-style:normal;margin-left:6px;padding:1px 7px;border-radius:6px;background:var(--blue-lt);color:var(--blue-dk);font-size:10.5px;font-weight:700}
-.cmp-tbl .sub-row td:first-child{padding-left:20px}
+.cmp-tbl .fc-tag{display:inline-flex;align-items:center;font-weight:700;letter-spacing:.2px;vertical-align:middle}
+.cmp-tbl .fc-tag i{font-style:normal;margin-left:6px;padding:1px 6px;border-radius:6px;background:var(--blue-lt);color:var(--blue-dk);font-size:10px;font-weight:700}
+.cmp-tbl .expand-btn{vertical-align:middle}
 .cmp-tbl .sub-row td:first-child::before{display:none!important;content:none!important}
-.cmp-tbl .grand-row td{color:#fff!important}
-.cmp-tbl .sub-row td.cl{color:var(--text-2);padding-left:32px;text-align:left}
+.cmp-tbl .sub-row td.cl{color:var(--text-2);padding-left:24px;text-align:left}
 .cmp-tbl .grp-hdr td:first-child{display:table-cell;border-left:3px solid var(--orange)}
 .cmp-tbl .grp-hdr td.cl{text-align:left;color:var(--text-2);font-weight:500;font-size:12px}
+.cmp-tbl .cpill{padding:2px 8px;font-size:11px}
+@media(max-width:900px){.cmp-wrap{overflow-x:auto!important}.cmp-tbl{min-width:760px}}
 
 /* CHART */
 .chart-wrap{padding:16px 20px 20px;position:relative}
@@ -915,13 +921,14 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
             <button class="btn-export" onclick="exportCmp('ob',this)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
-        <div class="tbl-wrap">
+        <div class="tbl-wrap cmp-wrap">
           <table class="pivot cmp-tbl">
+            <colgroup><col style="width:17%"><col style="width:20%"><col style="width:13%"><col style="width:11%"><col style="width:22%"><col style="width:17%"></colgroup>
             <thead><tr>
-              <th class="l" style="width:150px">FC</th><th class="l">Client</th>
-              <th>Total Shipments<small id="cmp-ob-th-t">&nbsp;</small></th><th>Scanned<small>&nbsp;</small></th>
-              <th>VMS Compliance % <span id="cmp-ob-lc">(—)</span><small id="cmp-ob-rc">&nbsp;</small></th>
-              <th>VMS Compliance % <span id="cmp-ob-lp">(—)</span><small id="cmp-ob-rp">&nbsp;</small></th>
+              <th class="l">FC</th><th class="l">Client</th>
+              <th><span class="hd-main">Total Shipments</span></th><th><span class="hd-main">Scanned</span></th>
+              <th class="cur"><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ob-hc">—</span></th>
+              <th><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ob-hp">—</span></th>
             </tr></thead>
             <tbody id="tb-cmp-ob"><tr><td colspan="6"><div class="skel" style="height:190px"></div></td></tr></tbody>
           </table>
@@ -934,13 +941,14 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
             <button class="btn-export" onclick="exportCmp('ret',this)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg> Export Excel</button>
           </div>
         </div>
-        <div class="tbl-wrap">
+        <div class="tbl-wrap cmp-wrap">
           <table class="pivot cmp-tbl">
+            <colgroup><col style="width:17%"><col style="width:20%"><col style="width:13%"><col style="width:11%"><col style="width:22%"><col style="width:17%"></colgroup>
             <thead><tr>
-              <th class="l" style="width:150px">FC</th><th class="l">Client</th>
-              <th>Total Returns<small id="cmp-ret-th-t">&nbsp;</small></th><th>Scanned<small>&nbsp;</small></th>
-              <th>VMS Compliance % <span id="cmp-ret-lc">(—)</span><small id="cmp-ret-rc">&nbsp;</small></th>
-              <th>VMS Compliance % <span id="cmp-ret-lp">(—)</span><small id="cmp-ret-rp">&nbsp;</small></th>
+              <th class="l">FC</th><th class="l">Client</th>
+              <th><span class="hd-main">Total Returns</span></th><th><span class="hd-main">Scanned</span></th>
+              <th class="cur"><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ret-hc">—</span></th>
+              <th><span class="hd-main">VMS Compliance %</span><span class="hd-sub" id="cmp-ret-hp">—</span></th>
             </tr></thead>
             <tbody id="tb-cmp-ret"><tr><td colspan="6"><div class="skel" style="height:190px"></div></td></tr></tbody>
           </table>
@@ -1211,7 +1219,7 @@ function buildUrl(action, from, to) {
   if (S.platforms.length) p.set('platform', S.platforms.join(','));
   if (S.locs.length) p.set('locs', S.locs.join(','));
   if (S.token) p.set('t', S.token);
-  if (action.indexOf('cmp_') === 0) p.set('mode', S.cmpMode || 'wow');
+  if (action.indexOf('cmp_') === 0) p.set('mode', S.cmpForce || S.cmpMode || 'wow');
   return `${API}?${p}`;
 }
 // A single rejected request must not throw a valid user back to the sign-in page:
@@ -1784,16 +1792,16 @@ async function loadCompare(){
     try { const d = await call('cmp_' + k); if (mode === S.cmpMode) renderCmp(k, d); }
     catch(e) { errTbl('tb-cmp-' + k, e); }
   }));
+  // silently warm the other pill in the background so switching is instant
+  const other = mode === 'wow' ? 'mom' : 'wow';
+  ['ob','ret'].forEach(k => { S.cmpForce = other; try { call('cmp_' + k).catch(() => {}); } finally { S.cmpForce = null; } });
 }
 function renderCmp(k, d){
   const M = d.meta, rows = d.rows || [], tb = document.getElementById('tb-cmp-' + k);
   S.cmpMeta = M;
   const wow = M.mode === 'wow';
-  document.getElementById('cmp-' + k + '-lc').textContent = '(' + M.curLabel + ')';
-  document.getElementById('cmp-' + k + '-lp').textContent = '(' + M.prevLabel + ')';
-  document.getElementById('cmp-' + k + '-rc').textContent = M.curRange;
-  document.getElementById('cmp-' + k + '-rp').textContent = M.prevRange;
-  document.getElementById('cmp-' + k + '-th-t').textContent = M.curLabel + ' · ' + M.curRange;
+  document.getElementById('cmp-' + k + '-hc').textContent = M.curLabel + ' · ' + M.curRange;
+  document.getElementById('cmp-' + k + '-hp').textContent = M.prevLabel + ' · ' + M.prevRange;
   document.getElementById('cmp-note').innerHTML = wow
     ? `Last completed week <b>${esc(M.curLabel)}</b> (${esc(M.curRange)}) vs <b>${esc(M.prevLabel)}</b> (${esc(M.prevRange)}) · change shown in percentage points`
     : `<b>${esc(M.curLabel)}</b> (${esc(M.curRange)}) vs <b>${esc(M.prevLabel)}</b> (${esc(M.prevRange)}) · same day range · change shown in percentage points`;
