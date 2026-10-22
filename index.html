@@ -171,15 +171,19 @@ button,input,select{font-family:inherit}
 .cmp-note b{color:var(--text-1)}
 .cmp-wrap{overflow-x:hidden!important}
 .cmp-tbl{table-layout:fixed;width:100%}
-.cmp-tbl thead th{padding:10px 12px;vertical-align:middle;line-height:1.3;white-space:normal}
+.cmp-tbl thead th{padding:10px 8px;vertical-align:middle;line-height:1.3;white-space:nowrap;text-align:center;font-size:10px;letter-spacing:.5px}
 .cmp-tbl thead th.l{text-align:left}
-.cmp-tbl thead th .hd-main{display:block}
+.cmp-tbl thead th.l+th.l{text-align:left}
+.cmp-tbl thead th .hd-main{display:block;white-space:nowrap}
+.cmp-tbl thead th#cmp-th-tot,.cmp-tbl thead th.wrapok{white-space:normal}
 .cmp-tbl thead th .hd-sub{display:inline-block;margin-top:5px;padding:2px 8px;border-radius:99px;background:#E6EEFB;color:#3F5A82;font-size:9.5px;font-weight:700;letter-spacing:.2px;text-transform:none;white-space:nowrap}
 .cmp-tbl thead th.cur .hd-sub{background:var(--orange-lt);color:var(--orange-dk)}
-.cmp-tbl tbody td{padding:9px 12px;overflow:hidden;text-overflow:ellipsis}
+.cmp-tbl tbody td{padding:9px 8px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.cmp-tbl tbody td:not(:first-child):not(.cl){text-align:center}
 .cmp-tbl tbody td.l{text-align:left;white-space:nowrap}
 .cmp-tbl .cur-cell{white-space:nowrap}
-.dlt{display:inline-flex;align-items:center;gap:2px;margin-left:6px;padding:0 5px;border-radius:4px;font-size:9px;line-height:16px;font-weight:700;letter-spacing:.1px;vertical-align:middle}
+.dlt{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:1px;margin-left:7px;width:50px;height:14px;padding:0;border-radius:4px;font-size:8px;line-height:14px;font-weight:700;letter-spacing:.1px;vertical-align:middle}
+.dlt.ph{visibility:hidden}
 .dlt.up{background:var(--green-bg);color:#0B7A47}
 .dlt.down{background:var(--red-bg);color:#B42318}
 .dlt.flat{background:#EEF2F7;color:#64748B}
@@ -192,7 +196,7 @@ button,input,select{font-family:inherit}
 .cmp-tbl .sub-row td.cl{color:var(--text-2);padding-left:24px;text-align:left}
 .cmp-tbl .grp-hdr td:first-child{display:table-cell;border-left:3px solid var(--orange)}
 .cmp-tbl .grp-hdr td.cl{text-align:left;color:var(--text-2);font-weight:500;font-size:12px}
-.cmp-tbl .cpill{padding:2px 8px;font-size:11px}
+.cmp-tbl .cpill{box-sizing:border-box;width:74px;height:22px;padding:0;justify-content:center;font-size:11px;line-height:22px}
 @media(max-width:900px){.cmp-wrap{overflow-x:auto!important}.cmp-tbl{min-width:760px}}
 
 /* CHART */
@@ -923,7 +927,7 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         </div>
         <div class="tbl-wrap cmp-wrap">
           <table class="pivot cmp-tbl">
-            <colgroup><col style="width:17%"><col style="width:20%"><col style="width:13%"><col style="width:11%"><col style="width:22%"><col style="width:17%"></colgroup>
+            <colgroup><col style="width:15%"><col style="width:19%"><col style="width:12%"><col style="width:11%"><col style="width:23%"><col style="width:20%"></colgroup>
             <thead><tr>
               <th class="l">FC</th><th class="l">Client</th>
               <th><span class="hd-main">Total Shipments</span></th><th><span class="hd-main">Scanned</span></th>
@@ -943,7 +947,7 @@ body.tab-report #autoRepBtn{box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 24p
         </div>
         <div class="tbl-wrap cmp-wrap">
           <table class="pivot cmp-tbl">
-            <colgroup><col style="width:17%"><col style="width:20%"><col style="width:13%"><col style="width:11%"><col style="width:22%"><col style="width:17%"></colgroup>
+            <colgroup><col style="width:15%"><col style="width:19%"><col style="width:12%"><col style="width:11%"><col style="width:23%"><col style="width:20%"></colgroup>
             <thead><tr>
               <th class="l">FC</th><th class="l">Client</th>
               <th><span class="hd-main">Total Returns</span></th><th><span class="hd-main">Scanned</span></th>
@@ -1765,7 +1769,7 @@ async function loadFilterOptions() {
 const FC_CODES = { GGN:'G1', BNG:'B1', HYD:'H3', MUM:'M4', KOL:'K3', CHN:'C3', CHE:'C3' };
 function fcTag(fc){ const c = FC_CODES[String(fc).toUpperCase()]; return `<span class="fc-tag">${esc(fc)}${c ? `<i>${c}</i>` : ''}</span>`; }
 function dltChip(cur, prev){
-  if (cur == null) return '';
+  if (cur == null) return '<span class="dlt ph">—</span>';
   if (prev == null) return '<span class="dlt new">NEW</span>';
   const d = cur - prev;
   if (Math.abs(d) < 0.05) return '<span class="dlt flat" title="No change">● 0.0 pp</span>';
