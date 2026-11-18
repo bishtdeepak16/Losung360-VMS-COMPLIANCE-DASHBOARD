@@ -1144,7 +1144,7 @@ function getMs(name) {
 // ================= LINKED SLICERS (FC / Client / Channel / Platform) =================
 const CAS = { rows: null, dims: ['client', 'loc', 'channel', 'platform'], sel: { client: new Set(), loc: new Set(), channel: new Set(), platform: new Set() } };
 const PLAT_LABEL = { FKVMS: 'FKVMS', SMOOTHOPS: 'SmoothOps', UNKNOWN: 'Unknown' };
-const FLIPKART_CLIENTS = ['VELOCITY', 'NIPPON'];
+const FLIPKART_CLIENTS = ['VELOCITY', 'NIPPON', 'MANNLICH', 'CGCEL'];
 function platOf(ch, client) { return !ch ? 'UNKNOWN' : (ch === 'FLIPKART' && FLIPKART_CLIENTS.includes(String(client || '').trim().toUpperCase())) ? 'FKVMS' : 'SMOOTHOPS'; }
 function casInit(opts) {
   const rows = [], seen = new Set();
